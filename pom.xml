@@ -19,8 +19,8 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <log-util.version>1.0.0-SNAPSHOT</log-util.version>
-        <spring-boot.version>2.6.6</spring-boot.version>
+        <log-util.version>1.0.1-SNAPSHOT</log-util.version>
+        <spring-boot.version>2.7.0</spring-boot.version>
         <fast.version>1.2.80</fast.version>
         <hutool.version>5.8.0.M2</hutool.version>
     </properties>
