@@ -1,13 +1,12 @@
 package cn.cruder.logutil.aop;
 
 import cn.cruder.logutil.annotation.AopLogger;
+import cn.cruder.logutil.enums.DatePattern;
 import cn.cruder.logutil.enums.LevelEnum;
 import cn.cruder.logutil.properties.LogProperties;
+import cn.cruder.logutil.utils.DateFormatUtil;
 import cn.cruder.logutil.utils.NetworkUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +23,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -36,6 +37,7 @@ import java.util.Date;
 @Aspect
 @AllArgsConstructor
 public class AopLoggerAspect {
+
 
     private final LogProperties logProperties;
 
@@ -82,7 +84,7 @@ public class AopLoggerAspect {
                         .requestParam(JSON.toJSONString(pointArgs))
                         .responseResult(JSON.toJSONString(result))
                         .processingTime((endTime - startTime) + "ms")
-                        .requestTime(DateUtil.format(new Date(startTime), DatePattern.NORM_DATETIME_MS_PATTERN))
+                        .requestTime(DateFormatUtil.format(new Date(startTime)))
                         .url(requestUrl.toString())
                         .httpMethod(method)
                         .classMethod(declaringTypeName + "." + sigName)
