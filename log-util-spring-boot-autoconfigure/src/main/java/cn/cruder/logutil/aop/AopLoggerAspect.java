@@ -38,7 +38,11 @@ import java.util.Date;
 @AllArgsConstructor
 public class AopLoggerAspect {
 
-
+    /**
+     * 说明：以引号开始，只包含字母数字或+-=的一串字，长度超过1024，最小匹配，以引号结束
+     */
+    public static final String PATTERN = "\"[\\w+-=]{1024,}?\"";
+    public static final String REPLACE = "\"very long (more than 1024)\"";
     private final LogProperties logProperties;
 
     /**
@@ -81,8 +85,8 @@ public class AopLoggerAspect {
                 StringBuffer requestUrl = request.getRequestURL();
                 LogInfo logInfo = LogInfo.builder()
                         .describe(describe)
-                        .requestParam(JSON.toJSONString(pointArgs))
-                        .responseResult(JSON.toJSONString(result))
+                        .requestParam(JSON.toJSONString(pointArgs).replaceAll(PATTERN, REPLACE))
+                        .responseResult(JSON.toJSONString(result).replaceAll(PATTERN, REPLACE))
                         .processingTime((endTime - startTime) + "ms")
                         .requestTime(DateFormatUtil.format(new Date(startTime)))
                         .url(requestUrl.toString())
