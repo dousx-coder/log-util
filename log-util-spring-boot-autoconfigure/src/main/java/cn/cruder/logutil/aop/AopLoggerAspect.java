@@ -23,6 +23,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * 日志
@@ -80,9 +81,19 @@ public class AopLoggerAspect {
                 String sigName = point.getSignature().getName();
                 String method = request.getMethod();
                 StringBuffer requestUrl = request.getRequestURL();
+                Object[] pointArgs = point.getArgs();
+                HashMap<Object, Object> requestParamMap = new HashMap<>();
+                if (pointArgs != null && pointArgs.length != 0) {
+                    String[] parameterNames = ((MethodSignature) point.getSignature()).getParameterNames();
+                    // parameterNames是参数名
+                    // pointArgs是参数值 一一对应
+                    for (int i = 0; i <  pointArgs.length; i++) {
+                        requestParamMap.put(parameterNames[i], pointArgs[i]);
+                    }
+                }
                 LogInfo logInfo = LogInfo.builder()
                         .describe(describe)
-                        .requestParam(getObject(point.getArgs()))
+                        .requestParam(getObject(requestParamMap))
                         .responseResult(getObject(result))
                         .processingTime((endTime - startTime) + "ms")
                         .requestTime(DateFormatUtil.format(new Date(startTime)))
