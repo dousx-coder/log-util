@@ -83,11 +83,11 @@ public class AopLoggerAspect {
                 StringBuffer requestUrl = request.getRequestURL();
                 Object[] pointArgs = point.getArgs();
                 HashMap<Object, Object> requestParamMap = new HashMap<>();
-                if (pointArgs != null && pointArgs.length != 0) {
-                    String[] parameterNames = ((MethodSignature) point.getSignature()).getParameterNames();
+                String[] parameterNames = ((MethodSignature) point.getSignature()).getParameterNames();
+                if (pointArgs != null && parameterNames != null && pointArgs.length != 0 && pointArgs.length == parameterNames.length) {
                     // parameterNames是参数名
                     // pointArgs是参数值 一一对应
-                    for (int i = 0; i <  pointArgs.length; i++) {
+                    for (int i = 0; i < pointArgs.length; i++) {
                         requestParamMap.put(parameterNames[i], pointArgs[i]);
                     }
                 }
