@@ -2,12 +2,10 @@ package cn.cruder.logutil.aop;
 
 import cn.cruder.logutil.annotation.AopLogger;
 import cn.cruder.logutil.enums.LevelEnum;
-import cn.cruder.logutil.properties.LogProperties;
+import cn.cruder.logutil.utils.DateFormatUtil;
 import cn.cruder.logutil.utils.NetworkUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +35,12 @@ import java.util.Date;
 @AllArgsConstructor
 public class AopLoggerAspect {
 
-    private final LogProperties logProperties;
+    /**
+     * 说明：以引号开始，只包含字母数字或+-=的一串字，长度超过1024，最小匹配，以引号结束
+     */
+    public static final String PATTERN = "\"[\\w+-=]{1024,}?\"";
+    public static final String REPLACE = "\"very long (more than 1024)\"";
+
 
     /**
      * <br/>
@@ -71,44 +74,72 @@ public class AopLoggerAspect {
         } finally {
             try {
                 long endTime = System.currentTimeMillis();
-                String describe = getAopLogDescribe(point);
+                AopLogger controllerLog = getAopLogger(point);
+                String describe = getAopLogDescribe(controllerLog);
                 String declaringTypeName = point.getSignature().getDeclaringTypeName();
                 String sigName = point.getSignature().getName();
-                Object[] pointArgs = point.getArgs();
                 String method = request.getMethod();
                 StringBuffer requestUrl = request.getRequestURL();
                 LogInfo logInfo = LogInfo.builder()
                         .describe(describe)
-                        .requestParam(JSON.toJSONString(pointArgs))
-                        .responseResult(JSON.toJSONString(result))
+                        .requestParam(getObject(point.getArgs()))
+                        .responseResult(getObject(result))
                         .processingTime((endTime - startTime) + "ms")
-                        .requestTime(DateUtil.format(new Date(startTime), DatePattern.NORM_DATETIME_MS_PATTERN))
+                        .requestTime(DateFormatUtil.format(new Date(startTime)))
                         .url(requestUrl.toString())
                         .httpMethod(method)
                         .classMethod(declaringTypeName + "." + sigName)
                         .ip(NetworkUtil.getIpAddress(request))
                         .build();
-                printLog(logInfo);
+                printLog(logInfo, aopLoggerLevel(controllerLog));
             } catch (Exception e) {
-                log.error("记录日志出错", e);
+                if (log.isTraceEnabled()) {
+                    log.trace("记录日志出错", e);
+                }
             }
         }
+    }
+
+    private Object getObject(Object obj) {
+        Object result = null;
+        try {
+            result = JSON.toJSONString(obj).replaceAll(PATTERN, REPLACE);
+            result = JSON.parseObject(String.valueOf(result));
+        } catch (Exception e) {
+            if (log.isTraceEnabled()) {
+                log.trace("参数转换异常:{}", String.valueOf(obj), e);
+            }
+        }
+        return result;
+
     }
 
     /**
      * 获取注解中对方法的描述信息
      *
-     * @param joinPoint 切点
+     * @param aopLogger {@link AopLogger}
      * @return describe
      */
-    private String getAopLogDescribe(JoinPoint joinPoint) {
-        AopLogger controllerLog = getAopLogger(joinPoint);
-        if (controllerLog == null) {
+    private String getAopLogDescribe(AopLogger aopLogger) {
+        if (aopLogger == null) {
             return "";
         }
-        return controllerLog.describe();
+        return aopLogger.describe();
     }
 
+
+    /**
+     * 获取注解中对方法的描述信息
+     *
+     * @param aopLogger {@link AopLogger}
+     * @return describe
+     */
+    private LevelEnum aopLoggerLevel(AopLogger aopLogger) {
+        if (aopLogger == null) {
+            return LevelEnum.DEBUG;
+        }
+        return aopLogger.level();
+    }
 
     /**
      * 获取方法上aop注解
@@ -123,18 +154,25 @@ public class AopLoggerAspect {
     }
 
 
-    public void printLog(LogInfo logInfo) {
-        LevelEnum levelEnum = LevelEnum.getLevelEnum(logProperties.getLevel());
-        switch (levelEnum) {
+    public void printLog(LogInfo logInfo, LevelEnum level) {
+        switch (level) {
             case INFO:
                 if (log.isInfoEnabled()) {
-                    log.info(logProperties.getPrefix() + logInfo.toString() + logProperties.getSuffix());
+                    log.info("\r\n{}", JSON.toJSONString(logInfo,
+                            SerializerFeature.PrettyFormat,
+                            SerializerFeature.WriteDateUseDateFormat,
+                            SerializerFeature.WriteMapNullValue,
+                            SerializerFeature.WriteNullListAsEmpty));
                 }
                 break;
             case DEBUG:
             default:
                 if (log.isDebugEnabled()) {
-                    log.debug(logProperties.getPrefix() + logInfo.toString() + logProperties.getSuffix());
+                    log.debug("\r\n{}", JSON.toJSONString(logInfo,
+                            SerializerFeature.PrettyFormat,
+                            SerializerFeature.WriteDateUseDateFormat,
+                            SerializerFeature.WriteMapNullValue,
+                            SerializerFeature.WriteNullListAsEmpty));
                 }
         }
 
@@ -153,12 +191,12 @@ public class AopLoggerAspect {
         /**
          * 请求参数
          */
-        private String requestParam;
+        private Object requestParam;
 
         /**
          * 请求结果
          */
-        private String responseResult;
+        private Object responseResult;
 
         /**
          * 处理时间 单位:ms
