@@ -6,9 +6,9 @@ import cn.cruder.logutil.utils.DateFormatUtil;
 import cn.cruder.logutil.utils.NetworkUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,6 +16,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -33,7 +36,7 @@ import java.util.HashMap;
  */
 @Slf4j
 @Aspect
-@AllArgsConstructor
+@NoArgsConstructor
 public class AopLoggerAspect {
 
     /**
@@ -42,6 +45,10 @@ public class AopLoggerAspect {
     public static final String PATTERN = "\"[\\w+-=]{1024,}?\"";
     public static final String REPLACE = "\"very long (more than 1024)\"";
 
+    /**
+     * 默认日志
+     */
+    private static final Logger defLog = org.slf4j.LoggerFactory.getLogger(AopLoggerAspect.class);
 
     /**
      * <br/>
@@ -50,6 +57,7 @@ public class AopLoggerAspect {
     @Pointcut("@annotation(cn.cruder.logutil.annotation.AopLogger)")
     public void recordLogAspect() {
     }
+
 
     /**
      * 记录日志
@@ -76,6 +84,7 @@ public class AopLoggerAspect {
             try {
                 long endTime = System.currentTimeMillis();
                 AopLogger controllerLog = getAopLogger(point);
+                Logger appointLog = appointLog(controllerLog);
                 String describe = getAopLogDescribe(controllerLog);
                 String declaringTypeName = point.getSignature().getDeclaringTypeName();
                 String sigName = point.getSignature().getName();
@@ -93,8 +102,8 @@ public class AopLoggerAspect {
                 }
                 LogInfo logInfo = LogInfo.builder()
                         .describe(describe)
-                        .requestParam(getObject(requestParamMap))
-                        .responseResult(getObject(result))
+                        .requestParam(getObject(requestParamMap, ignoreLongText(controllerLog)))
+                        .responseResult(getObject(result, ignoreLongText(controllerLog)))
                         .processingTime((endTime - startTime) + "ms")
                         .requestTime(DateFormatUtil.format(new Date(startTime)))
                         .url(requestUrl.toString())
@@ -102,7 +111,7 @@ public class AopLoggerAspect {
                         .classMethod(declaringTypeName + "." + sigName)
                         .ip(NetworkUtil.getIpAddress(request))
                         .build();
-                printLog(logInfo, aopLoggerLevel(controllerLog));
+                printLog(logInfo, aopLoggerLevel(controllerLog), appointLog, isFormat(controllerLog));
             } catch (Exception e) {
                 if (log.isTraceEnabled()) {
                     log.trace("记录日志出错", e);
@@ -111,10 +120,30 @@ public class AopLoggerAspect {
         }
     }
 
-    private Object getObject(Object obj) {
+    private Logger appointLog(AopLogger controllerLog) {
+        String appointLogName = appointLogName(controllerLog);
+        Logger appointLog = defLog;
+        if (!ObjectUtils.isEmpty(appointLogName)) {
+            try {
+                Logger logger = LoggerFactory.getLogger(appointLogName);
+                if (logger != null) {
+                    appointLog = logger;
+                }
+            } catch (Throwable e) {
+                defLog.warn("获取指定Logger失败:{},采用默认Logger:{}", appointLogName, defLog);
+            }
+        }
+        return appointLog;
+    }
+
+    private Object getObject(Object obj, Boolean ignoreLongText) {
         Object result = null;
         try {
-            result = JSON.toJSONString(obj).replaceAll(PATTERN, REPLACE);
+            if (ignoreLongText) {
+                result = JSON.toJSONString(obj).replaceAll(PATTERN, REPLACE);
+            } else {
+                result = JSON.toJSONString(obj);
+            }
             result = JSON.parseObject(String.valueOf(result));
         } catch (Exception e) {
             if (log.isTraceEnabled()) {
@@ -138,6 +167,32 @@ public class AopLoggerAspect {
         return aopLogger.describe();
     }
 
+    /**
+     * 获取注解中对方法的描述信息
+     *
+     * @param aopLogger {@link AopLogger}
+     * @return describe
+     */
+    private String appointLogName(AopLogger aopLogger) {
+        if (aopLogger == null) {
+            return "";
+        }
+        return aopLogger.appointLog();
+    }
+
+    private Boolean ignoreLongText(AopLogger aopLogger) {
+        if (aopLogger == null) {
+            return false;
+        }
+        return aopLogger.ignoreLongText();
+    }
+
+    private Boolean isFormat(AopLogger aopLogger) {
+        if (aopLogger == null) {
+            return false;
+        }
+        return aopLogger.isFormat();
+    }
 
     /**
      * 获取注解中对方法的描述信息
@@ -165,29 +220,35 @@ public class AopLoggerAspect {
     }
 
 
-    public void printLog(LogInfo logInfo, LevelEnum level) {
+    public void printLog(LogInfo logInfo, LevelEnum level, Logger log, Boolean isFormat) {
         switch (level) {
             case INFO:
                 if (log.isInfoEnabled()) {
-                    log.info("\r\n{}", JSON.toJSONString(logInfo,
-                            SerializerFeature.PrettyFormat,
-                            SerializerFeature.WriteDateUseDateFormat,
-                            SerializerFeature.WriteMapNullValue,
-                            SerializerFeature.WriteNullListAsEmpty));
+                    if (isFormat) {
+                        log.info("\r\n{}", JSON.toJSONString(logInfo,
+                                SerializerFeature.PrettyFormat,
+                                SerializerFeature.WriteDateUseDateFormat,
+                                SerializerFeature.WriteMapNullValue,
+                                SerializerFeature.WriteNullListAsEmpty));
+                    } else {
+                        log.info("{}", JSON.toJSONString(logInfo));
+                    }
                 }
                 break;
             case DEBUG:
             default:
                 if (log.isDebugEnabled()) {
-                    log.debug("\r\n{}", JSON.toJSONString(logInfo,
-                            SerializerFeature.PrettyFormat,
-                            SerializerFeature.WriteDateUseDateFormat,
-                            SerializerFeature.WriteMapNullValue,
-                            SerializerFeature.WriteNullListAsEmpty));
+                    if (isFormat) {
+                        log.debug("\r\n{}", JSON.toJSONString(logInfo,
+                                SerializerFeature.PrettyFormat,
+                                SerializerFeature.WriteDateUseDateFormat,
+                                SerializerFeature.WriteMapNullValue,
+                                SerializerFeature.WriteNullListAsEmpty));
+                    } else {
+                        log.debug("{}", JSON.toJSONString(logInfo));
+                    }
                 }
         }
-
-
     }
 
     @Builder
