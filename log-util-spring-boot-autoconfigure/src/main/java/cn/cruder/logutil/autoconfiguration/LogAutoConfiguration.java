@@ -1,8 +1,9 @@
 package cn.cruder.logutil.autoconfiguration;
 
+import cn.cruder.logutil.annotation.EnableAopLog;
 import cn.cruder.logutil.aop.AopLoggerAspect;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import cn.cruder.logutil.service.LogService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -16,10 +17,19 @@ import org.springframework.core.annotation.Order;
 @Configuration
 public class LogAutoConfiguration {
 
+    /**
+     * 手动注入的原因是让Bean的注入归{@link EnableAopLog}控制
+     */
+    @Bean(value = LogService.NAME)
+    public LogService logService() {
+        return new LogService();
+    }
+
     @Order(-10)
-    @Bean(value = "cruder_aopLoggerAspect")
-    public AopLoggerAspect aopLoggerAspect() {
-        return new AopLoggerAspect();
+    @Bean(value = AopLoggerAspect.NAME)
+    @ConditionalOnClass(LogService.class)
+    public AopLoggerAspect aopLoggerAspect(LogService logService) {
+        return new AopLoggerAspect(logService);
     }
 
 }

@@ -1,6 +1,7 @@
 package cn.cruder.logutil.annotation;
 
 
+import cn.cruder.logutil.autoconfiguration.TaskExecutorConfigurer;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.context.annotation.Import;
 
@@ -17,6 +18,6 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 @AutoConfigurationPackage
-@Import({cn.cruder.logutil.autoconfiguration.LogAutoConfiguration.class})
+@Import({cn.cruder.logutil.autoconfiguration.LogAutoConfiguration.class, TaskExecutorConfigurer.class})
 public @interface EnableAopLog {
 }
