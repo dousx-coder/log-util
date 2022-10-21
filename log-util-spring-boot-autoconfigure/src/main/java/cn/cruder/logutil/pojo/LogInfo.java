@@ -40,9 +40,9 @@ public final class LogInfo {
     private String finishTime;
 
     /**
-     * url
+     * uri
      */
-    private String url;
+    private String uri;
 
     /**
      * 请求方式

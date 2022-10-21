@@ -1,6 +1,7 @@
 package cn.cruder.logutil.aop;
 
 import cn.cruder.logutil.annotation.AopLogger;
+import cn.cruder.logutil.constant.LogConstant;
 import cn.cruder.logutil.enums.LevelEnum;
 import cn.cruder.logutil.pojo.LogInfo;
 import cn.cruder.logutil.service.LogService;
@@ -21,6 +22,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -83,7 +85,7 @@ public class AopLoggerAspect {
         } finally {
             try {
                 long endTime = System.currentTimeMillis();
-                logService.recordLog(point, result, request, startTime, endTime);
+                logService.recordLog(point, result, request, startTime, endTime, MDC.get(LogConstant.TRACE_ID));
             } catch (Exception e) {
                 if (log.isTraceEnabled()) {
                     log.trace("记录日志出错", e);

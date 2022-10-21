@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.Arrays;
+
 
 /**
  * @author dousx
@@ -50,7 +52,7 @@ public class TaskExecutorConfigurer implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, objects) -> {
-            log.error("异步异常: {}\t{}\t{} ", throwable.getMessage(), method.getName(), objects, throwable);
+            log.error(String.format("异步异常:%s\t %s\t ", throwable.getMessage(), method.getName()), throwable);
         };
     }
 }

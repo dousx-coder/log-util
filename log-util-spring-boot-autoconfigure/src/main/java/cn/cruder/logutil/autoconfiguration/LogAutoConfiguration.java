@@ -2,6 +2,7 @@ package cn.cruder.logutil.autoconfiguration;
 
 import cn.cruder.logutil.annotation.EnableAopLog;
 import cn.cruder.logutil.aop.AopLoggerAspect;
+import cn.cruder.logutil.hand.TraceIdInterceptor;
 import cn.cruder.logutil.service.LogService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,12 @@ public class LogAutoConfiguration {
     @ConditionalOnClass(LogService.class)
     public AopLoggerAspect aopLoggerAspect(LogService logService) {
         return new AopLoggerAspect(logService);
+    }
+
+
+    @Bean(value = TraceIdInterceptor.NAME)
+    public TraceIdInterceptor traceIdInterceptor() {
+        return new TraceIdInterceptor();
     }
 
 }

@@ -2,6 +2,7 @@ package cn.cruder.logutil.service;
 
 import cn.cruder.logutil.annotation.AopLogger;
 import cn.cruder.logutil.autoconfiguration.TaskExecutorConfigurer;
+import cn.cruder.logutil.constant.LogConstant;
 import cn.cruder.logutil.enums.LevelEnum;
 import cn.cruder.logutil.pojo.LogInfo;
 import cn.cruder.logutil.utils.DateFormatUtil;
@@ -13,6 +14,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,54 +44,60 @@ public class LogService {
      * @param request   {@link HttpServletRequest}
      * @param startTime 请求时间
      * @param endTime   完成时间
+     * @param traceId   traceId需要传递当前线程
      */
     @Async(TaskExecutorConfigurer.LOG_POOL)
-    public void recordLog(ProceedingJoinPoint point, Object result, HttpServletRequest request, long startTime, long endTime) {
-        AopLogger controllerLog = getAopLogger(point);
-        LevelEnum level = aopLoggerLevel(controllerLog);
-        Logger appointLog = appointLog(controllerLog);
-        if (!checkPrintLog(level, appointLog)) {
-            return;
-        }
-        String describe = getAopLogDescribe(controllerLog);
-        String declaringTypeName = point.getSignature().getDeclaringTypeName();
-        String sigName = point.getSignature().getName();
-        String method = request.getMethod();
-        StringBuffer requestUrl = request.getRequestURL();
-        Object[] pointArgs = point.getArgs();
-        HashMap<Object, Object> requestParamMap = new HashMap<>();
-        String[] parameterNames = ((MethodSignature) point.getSignature()).getParameterNames();
-        if (pointArgs != null && parameterNames != null && pointArgs.length != 0 && pointArgs.length == parameterNames.length) {
-            // parameterNames是参数名
-            // pointArgs是参数值 一一对应
-            for (int i = 0; i < pointArgs.length; i++) {
-                if (pointArgs[i] instanceof MultipartFile) {
-                    MultipartFile mf = (MultipartFile) pointArgs[i];
-                    HashMap<String, Object> hashMap = new HashMap<>(4);
-                    hashMap.put("size", mf.getSize());
-                    hashMap.put("originalFilename", mf.getOriginalFilename());
-                    hashMap.put("contentType", mf.getContentType());
-                    hashMap.put("name", mf.getName());
-                    requestParamMap.put(parameterNames[i], hashMap);
-                    continue;
-                }
-                requestParamMap.put(parameterNames[i], pointArgs[i]);
+    public void recordLog(ProceedingJoinPoint point, Object result, HttpServletRequest request, long startTime, long endTime, String traceId) {
+        try {
+            MDC.put(LogConstant.TRACE_ID, traceId);
+            AopLogger controllerLog = getAopLogger(point);
+            LevelEnum level = aopLoggerLevel(controllerLog);
+            Logger appointLog = appointLog(controllerLog);
+            if (!checkPrintLog(level, appointLog)) {
+                return;
             }
+            String describe = getAopLogDescribe(controllerLog);
+            String declaringTypeName = point.getSignature().getDeclaringTypeName();
+            String sigName = point.getSignature().getName();
+            String method = request.getMethod();
+            Object[] pointArgs = point.getArgs();
+            HashMap<Object, Object> requestParamMap = new HashMap<>();
+            String[] parameterNames = ((MethodSignature) point.getSignature()).getParameterNames();
+            if (pointArgs != null && parameterNames != null && pointArgs.length != 0 && pointArgs.length == parameterNames.length) {
+                // parameterNames是参数名
+                // pointArgs是参数值 一一对应
+                for (int i = 0; i < pointArgs.length; i++) {
+                    if (pointArgs[i] instanceof MultipartFile) {
+                        MultipartFile mf = (MultipartFile) pointArgs[i];
+                        HashMap<String, Object> hashMap = new HashMap<>(4);
+                        hashMap.put("size", mf.getSize());
+                        hashMap.put("originalFilename", mf.getOriginalFilename());
+                        hashMap.put("contentType", mf.getContentType());
+                        hashMap.put("name", mf.getName());
+                        requestParamMap.put(parameterNames[i], hashMap);
+                        continue;
+                    }
+                    requestParamMap.put(parameterNames[i], pointArgs[i]);
+                }
+            }
+
+            Boolean ignoreLongText = ignoreLongText(controllerLog);
+            LogInfo logInfo = LogInfo.builder()
+                    .describe(describe)
+                    .requestParam(getObject(requestParamMap, ignoreLongText, appointLog))
+                    .responseResult(getObject(result, ignoreLongText, appointLog))
+                    .processingTime((endTime - startTime) + "ms")
+                    .requestTime(DateFormatUtil.format(new Date(startTime)))
+                    .finishTime(DateFormatUtil.format(new Date(endTime)))
+                    .uri(request.getRequestURI())
+                    .httpMethod(method)
+                    .classMethod(declaringTypeName + "." + sigName)
+                    .ip(NetworkUtil.getIpAddress(request))
+                    .build();
+            printLog(logInfo, level, appointLog, isFormat(controllerLog));
+        } finally {
+            MDC.remove(LogConstant.TRACE_ID);
         }
-        Boolean ignoreLongText = ignoreLongText(controllerLog);
-        LogInfo logInfo = LogInfo.builder()
-                .describe(describe)
-                .requestParam(getObject(requestParamMap, ignoreLongText, appointLog))
-                .responseResult(getObject(result, ignoreLongText, appointLog))
-                .processingTime((endTime - startTime) + "ms")
-                .requestTime(DateFormatUtil.format(new Date(startTime)))
-                .finishTime(DateFormatUtil.format(new Date(endTime)))
-                .url(requestUrl.toString())
-                .httpMethod(method)
-                .classMethod(declaringTypeName + "." + sigName)
-                .ip(NetworkUtil.getIpAddress(request))
-                .build();
-        printLog(logInfo, level, appointLog, isFormat(controllerLog));
 
     }
 
