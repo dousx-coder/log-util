@@ -6,7 +6,7 @@
     <groupId>cn.cruder</groupId>
     <artifactId>log-util</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${log-util.version}</version>
     <modules>
         <module>log-util-spring-boot-autoconfigure</module>
         <module>log-util-spring-boot-starter</module>
@@ -90,6 +90,13 @@
             </plugin>
         </plugins>
     </build>
-
+    <distributionManagement>
+        <repository>
+            <!--nexus服务器中用户名：在settings.xml中和<server>的id一致-->
+            <id>cruderRepo</id>
+            <!--仓库地址-->
+            <url>http://192.168.0.108:8081/repository/cruderRepo/</url>
+        </repository>
+    </distributionManagement>
 
 </project>
