@@ -9,7 +9,7 @@ mvn clean package install -Dmaven.test.skip=true
 <dependency>
     <groupId>cn.cruder</groupId>
     <artifactId>log-util-spring-boot-starter</artifactId>
-    <version>1.1.2022082012</version>
+    <version>1.1.2022102116</version>
 </dependency>
 ```
 启动类添加`@EnableAopLog`注解打开日志功能
