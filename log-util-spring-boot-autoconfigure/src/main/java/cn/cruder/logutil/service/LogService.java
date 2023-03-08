@@ -8,6 +8,7 @@ import cn.cruder.logutil.pojo.LogInfo;
 import cn.cruder.logutil.utils.DateFormatUtil;
 import cn.cruder.logutil.utils.NetworkUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -212,6 +213,8 @@ public class LogService {
 
 
     private void printLog(LogInfo logInfo, LevelEnum level, Logger log, Boolean isFormat) {
+        JSON.DEFAULT_GENERATE_FEATURE &= ~SerializerFeature.SortField.getMask();
+        SerializeConfig serializeConfig = new SerializeConfig(true);
         switch (level) {
             case INFO:
                 if (log.isInfoEnabled()) {
@@ -222,7 +225,7 @@ public class LogService {
                                 SerializerFeature.WriteMapNullValue,
                                 SerializerFeature.WriteNullListAsEmpty));
                     } else {
-                        log.info("{}", JSON.toJSONString(logInfo));
+                        log.info("{}", JSON.toJSONString(logInfo, serializeConfig));
                     }
                 }
                 break;
@@ -236,7 +239,7 @@ public class LogService {
                                 SerializerFeature.WriteMapNullValue,
                                 SerializerFeature.WriteNullListAsEmpty));
                     } else {
-                        log.debug("{}", JSON.toJSONString(logInfo));
+                        log.debug("{}", JSON.toJSONString(logInfo, serializeConfig));
                     }
                 }
         }
