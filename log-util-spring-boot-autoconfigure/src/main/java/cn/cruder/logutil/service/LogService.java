@@ -103,7 +103,7 @@ public class LogService {
     }
 
     private Boolean checkPrintLog(LevelEnum aopLogLevel, Logger log) {
-        if (log.isDebugEnabled() && LevelEnum.DEBUG.equals(aopLogLevel)) {
+        if (log.isDebugEnabled() && (LevelEnum.DEBUG.equals(aopLogLevel) || LevelEnum.INFO.equals(aopLogLevel))) {
             return true;
         }
         if (log.isInfoEnabled() && LevelEnum.INFO.equals(aopLogLevel)) {
