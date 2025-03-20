@@ -1,8 +1,9 @@
-package cn.cruder.logutil.annotation;
+package io.github.dousxcoder.logutil.annotation;
 
 
-import cn.cruder.logutil.autoconfiguration.TaskExecutorConfigurer;
-import cn.cruder.logutil.autoconfiguration.TraceIdInterceptorConfig;
+import io.github.dousxcoder.logutil.autoconfiguration.TaskExecutorConfigurer;
+import io.github.dousxcoder.logutil.autoconfiguration.LogAutoConfiguration;
+import io.github.dousxcoder.logutil.autoconfiguration.TraceIdInterceptorConfig;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.context.annotation.Import;
 
@@ -19,6 +20,6 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 @AutoConfigurationPackage
-@Import({cn.cruder.logutil.autoconfiguration.LogAutoConfiguration.class, TaskExecutorConfigurer.class, TraceIdInterceptorConfig.class})
+@Import({LogAutoConfiguration.class, TaskExecutorConfigurer.class, TraceIdInterceptorConfig.class})
 public @interface EnableAopLog {
 }

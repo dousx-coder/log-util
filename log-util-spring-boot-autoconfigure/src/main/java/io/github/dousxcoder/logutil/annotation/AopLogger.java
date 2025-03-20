@@ -1,6 +1,6 @@
-package cn.cruder.logutil.annotation;
+package io.github.dousxcoder.logutil.annotation;
 
-import cn.cruder.logutil.enums.LevelEnum;
+import io.github.dousxcoder.logutil.enums.LevelEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

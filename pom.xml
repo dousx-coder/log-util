@@ -3,23 +3,48 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.cruder</groupId>
+    <groupId>io.github.dousx-coder</groupId>
     <artifactId>log-util</artifactId>
+    <version>1.1.20250320-11</version>
     <packaging>pom</packaging>
-    <version>1.0</version>
     <modules>
         <module>log-util-spring-boot-autoconfigure</module>
         <module>log-util-spring-boot-starter</module>
     </modules>
     <name>log-util</name>
-    <description>log-util</description>
+    <description>log-util-spring-boot-starter</description>
+    <url>https://github.com/dousx-coder/log-util</url>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>dousx</id>
+            <name>dousx</name>
+            <email>dousx_cn@163.com</email>
+            <roles>
+                <role>Project Manager</role>
+                <role>Architect</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/dousx-coder/log-util.git</connection>
+        <developerConnection>scm:git:ssh://github.com:dousx-coder/log-util.git</developerConnection>
+        <url>https://github.com/dousx-coder/log-util/tree/master</url>
+    </scm>
 
     <properties>
         <java.version>1.8</java.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <log-util.version>1.1.20230615-20</log-util.version>
+        <log-util.version>1.1.20250320-11</log-util.version>
         <spring-boot.version>2.7.0</spring-boot.version>
         <fast.version>1.2.80</fast.version>
     </properties>
@@ -59,19 +84,33 @@
         </dependencies>
     </dependencyManagement>
 
-
     <build>
         <plugins>
-            <!--提供source-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
                 <configuration>
-                    <attach>true</attach>
+                    <additionalJOptions>
+                        <additionalJOption>-Xdoclint:none</additionalJOption>
+                    </additionalJOptions>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>compile</phase>
+                        <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -80,15 +119,31 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--   central发布插件    -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <!-- 解决编码问题 -->
-                    <encoding>utf8</encoding>
+                    <publishingServerId>maven-center</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 
 </project>

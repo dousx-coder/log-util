@@ -1,4 +1,4 @@
-package cn.cruder.logutil.pojo;
+package io.github.dousxcoder.logutil.pojo;
 
 import lombok.Builder;
 import lombok.Data;

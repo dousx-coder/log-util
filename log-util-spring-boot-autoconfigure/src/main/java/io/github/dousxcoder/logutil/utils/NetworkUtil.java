@@ -1,4 +1,4 @@
-package cn.cruder.logutil.utils;
+package io.github.dousxcoder.logutil.utils;
 
 import lombok.extern.slf4j.Slf4j;
 

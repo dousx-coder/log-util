@@ -1,9 +1,9 @@
-package cn.cruder.logutil.autoconfiguration;
+package io.github.dousxcoder.logutil.autoconfiguration;
 
-import cn.cruder.logutil.annotation.EnableAopLog;
-import cn.cruder.logutil.aop.AopLoggerAspect;
-import cn.cruder.logutil.hand.TraceIdInterceptor;
-import cn.cruder.logutil.service.LogService;
+import io.github.dousxcoder.logutil.annotation.EnableAopLog;
+import io.github.dousxcoder.logutil.aop.AopLoggerAspect;
+import io.github.dousxcoder.logutil.hand.TraceIdInterceptor;
+import io.github.dousxcoder.logutil.service.LogService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

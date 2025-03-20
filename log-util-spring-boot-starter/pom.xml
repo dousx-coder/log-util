@@ -3,14 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <groupId>io.github.dousx-coder</groupId>
         <artifactId>log-util</artifactId>
-        <version>1.0</version>
-        <groupId>cn.cruder</groupId>
+        <version>1.1.20250320-11</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>log-util-spring-boot-starter</artifactId>
-    <version>${log-util.version}</version>
+
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -20,7 +20,7 @@
     <dependencies>
         <!--引入autoconfigure-->
         <dependency>
-            <groupId>cn.cruder</groupId>
+            <groupId>io.github.dousx-coder</groupId>
             <artifactId>log-util-spring-boot-autoconfigure</artifactId>
             <version>${log-util.version}</version>
         </dependency>

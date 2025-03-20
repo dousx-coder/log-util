@@ -1,4 +1,4 @@
-package cn.cruder.logutil.autoconfiguration;
+package io.github.dousxcoder.logutil.autoconfiguration;
 
 
 import org.slf4j.Logger;
@@ -9,8 +9,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import java.util.Arrays;
 
 
 /**

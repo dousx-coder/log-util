@@ -1,6 +1,6 @@
-package cn.cruder.logutil.autoconfiguration;
+package io.github.dousxcoder.logutil.autoconfiguration;
 
-import cn.cruder.logutil.hand.TraceIdInterceptor;
+import io.github.dousxcoder.logutil.hand.TraceIdInterceptor;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;

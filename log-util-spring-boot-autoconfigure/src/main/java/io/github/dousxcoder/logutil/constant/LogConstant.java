@@ -1,4 +1,4 @@
-package cn.cruder.logutil.constant;
+package io.github.dousxcoder.logutil.constant;
 
 public final class LogConstant {
     private LogConstant() {

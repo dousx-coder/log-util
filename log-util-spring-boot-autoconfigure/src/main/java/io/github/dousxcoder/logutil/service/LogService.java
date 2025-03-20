@@ -1,12 +1,12 @@
-package cn.cruder.logutil.service;
+package io.github.dousxcoder.logutil.service;
 
-import cn.cruder.logutil.annotation.AopLogger;
-import cn.cruder.logutil.autoconfiguration.TaskExecutorConfigurer;
-import cn.cruder.logutil.constant.LogConstant;
-import cn.cruder.logutil.enums.LevelEnum;
-import cn.cruder.logutil.pojo.LogInfo;
-import cn.cruder.logutil.utils.DateFormatUtil;
-import cn.cruder.logutil.utils.NetworkUtil;
+import io.github.dousxcoder.logutil.annotation.AopLogger;
+import io.github.dousxcoder.logutil.autoconfiguration.TaskExecutorConfigurer;
+import io.github.dousxcoder.logutil.constant.LogConstant;
+import io.github.dousxcoder.logutil.enums.LevelEnum;
+import io.github.dousxcoder.logutil.pojo.LogInfo;
+import io.github.dousxcoder.logutil.utils.DateFormatUtil;
+import io.github.dousxcoder.logutil.utils.NetworkUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;

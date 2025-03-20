@@ -1,6 +1,6 @@
-package cn.cruder.logutil.utils;
+package io.github.dousxcoder.logutil.utils;
 
-import cn.cruder.logutil.enums.DatePattern;
+import io.github.dousxcoder.logutil.enums.DatePattern;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

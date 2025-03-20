@@ -1,6 +1,6 @@
-package cn.cruder.logutil.hand;
+package io.github.dousxcoder.logutil.hand;
 
-import cn.cruder.logutil.constant.LogConstant;
+import io.github.dousxcoder.logutil.constant.LogConstant;
 import org.slf4j.MDC;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;

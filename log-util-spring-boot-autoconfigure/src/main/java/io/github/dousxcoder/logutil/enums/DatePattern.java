@@ -1,4 +1,4 @@
-package cn.cruder.logutil.enums;
+package io.github.dousxcoder.logutil.enums;
 
 /**
  * @author dousx
